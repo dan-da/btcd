@@ -664,11 +664,12 @@ func createVinListPrevOut(s *rpcServer, mtx *wire.MsgTx, chainParams *chaincfg.P
 			if vinExtra == 1 {
 			
 				txStore := txStoreMap[v.PreviousOutPoint.Hash]
-				if txStore != nil {
+				if txStore == nil {
 					tx := btcutil.NewTx(mtx)				
-					txStore, _ := s.server.txMemPool.fetchInputTransactions(tx, true)
-					if txStore != nil {
-						txStoreMap[v.PreviousOutPoint.Hash] = &txStore
+					txStoreNew, _ := s.server.txMemPool.fetchInputTransactions(tx, true)
+					if txStoreNew != nil {
+						txStore = &txStoreNew
+						txStoreMap[v.PreviousOutPoint.Hash] = txStore
 					}
 				}
 				if txStore != nil && len(*txStore) != 0 {
