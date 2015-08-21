@@ -641,6 +641,9 @@ func createVinList(mtx *wire.MsgTx) []btcjson.Vin {
 // transaction.
 func createVinListPrevOut(s *rpcServer, mtx *wire.MsgTx, chainParams *chaincfg.Params, vinExtra int) []btcjson.VinPrevOut {
 	vinList := make([]btcjson.VinPrevOut, len(mtx.TxIn))
+	
+	txStoreMap := make(map[wire.ShaHash]*blockchain.TxStore)
+	
 	for i, v := range mtx.TxIn {
 		if blockchain.IsCoinBaseTx(mtx) {
 			vinList[i].Coinbase = hex.EncodeToString(v.SignatureScript)
@@ -659,14 +662,20 @@ func createVinListPrevOut(s *rpcServer, mtx *wire.MsgTx, chainParams *chaincfg.P
 			// If vinExtra flag is set then we grab extra data from the
 			// previous transaction output.
 			if vinExtra == 1 {
-
-				tx := btcutil.NewTx(mtx)
-				txStore, err := s.server.txMemPool.fetchInputTransactions(tx, true)
-				if err == nil && len(txStore) != 0 {
+			
+				txStore := txStoreMap[v.PreviousOutPoint.Hash]
+				if txStore != nil {
+					tx := btcutil.NewTx(mtx)				
+					txStore, _ := s.server.txMemPool.fetchInputTransactions(tx, true)
+					if txStore != nil {
+						txStoreMap[v.PreviousOutPoint.Hash] = &txStore
+					}
+				}
+				if txStore != nil && len(*txStore) != 0 {
 
 					vinList[i].PrevOut = new(btcjson.PrevOut)
 
-					txData := txStore[v.PreviousOutPoint.Hash]
+					txData := (*txStore)[v.PreviousOutPoint.Hash]
 					originTxOut := txData.Tx.MsgTx().TxOut[v.PreviousOutPoint.Index]
 					vinList[i].PrevOut.Value = btcutil.Amount(originTxOut.Value).ToBTC()
 
