@@ -641,8 +641,7 @@ func createVinList(mtx *wire.MsgTx) []btcjson.Vin {
 // transaction.
 func createVinListPrevOut(s *rpcServer, mtx *wire.MsgTx, chainParams *chaincfg.Params, vinExtra int) []btcjson.VinPrevOut {
 	vinList := make([]btcjson.VinPrevOut, len(mtx.TxIn))
-	
-	txStoreMap := make(map[wire.ShaHash]*blockchain.TxStore)
+	var txStore *blockchain.TxStore
 	
 	for i, v := range mtx.TxIn {
 		if blockchain.IsCoinBaseTx(mtx) {
@@ -662,14 +661,13 @@ func createVinListPrevOut(s *rpcServer, mtx *wire.MsgTx, chainParams *chaincfg.P
 			// If vinExtra flag is set then we grab extra data from the
 			// previous transaction output.
 			if vinExtra == 1 {
-			
-				txStore := txStoreMap[v.PreviousOutPoint.Hash]
+
+				// we only need to do this the first time.
 				if txStore == nil {
-					tx := btcutil.NewTx(mtx)				
-					txStoreNew, _ := s.server.txMemPool.fetchInputTransactions(tx, true)
-					if txStoreNew != nil {
+					tx := btcutil.NewTx(mtx)
+					txStoreNew, err := s.server.txMemPool.fetchInputTransactions(tx, true)
+					if err == nil {
 						txStore = &txStoreNew
-						txStoreMap[v.PreviousOutPoint.Hash] = txStore
 					}
 				}
 				if txStore != nil && len(*txStore) != 0 {
