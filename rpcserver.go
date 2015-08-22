@@ -662,7 +662,8 @@ func createVinListPrevOut(s *rpcServer, mtx *wire.MsgTx, chainParams *chaincfg.P
 			// previous transaction output.
 			if vinExtra == 1 {
 
-				// we only need to do this the first time.
+				// we only need to do this the first time because fetchInputTransactions
+				// gives us all the input transactions in one go.
 				if txStore == nil {
 					tx := btcutil.NewTx(mtx)
 					txStoreNew, err := s.server.txMemPool.fetchInputTransactions(tx, true)
