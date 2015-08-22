@@ -654,13 +654,18 @@ func stringInSlice(a string, list []string) bool {
 // transaction.
 func createVinListPrevOut(s *rpcServer, mtx *wire.MsgTx, chainParams *chaincfg.Params, vinExtra int, filterAddrs []string) []btcjson.VinPrevOut {
 	vinList := []btcjson.VinPrevOut{}
+
+	// we don't call fetchInputTransactions() here because it may not be
+	// necessary so we defer until it is.  ( lazy load )
+	var txStore *blockchain.TxStore
+
 	for _, v := range mtx.TxIn {
 		var vin btcjson.VinPrevOut
 		passesFilter := true
 		if( filterAddrs != nil ) {
 			passesFilter = false
 		}
-		
+
 		if blockchain.IsCoinBaseTx(mtx) {
 			vin.Coinbase = hex.EncodeToString(v.SignatureScript)
 		} else {
@@ -679,13 +684,20 @@ func createVinListPrevOut(s *rpcServer, mtx *wire.MsgTx, chainParams *chaincfg.P
 			// previous transaction output.
 			if vinExtra == 1 || filterAddrs != nil  {
 
-				tx := btcutil.NewTx(mtx)
-				txStore, err := s.server.txMemPool.fetchInputTransactions(tx, true)
-				if err == nil && len(txStore) != 0 {
+				// we only need to do this the first time because fetchInputTransactions
+				// gives us all the input transactions in one go.
+				if txStore == nil {
+					tx := btcutil.NewTx(mtx)
+					txStoreNew, err := s.server.txMemPool.fetchInputTransactions(tx, true)
+					if err == nil {
+						txStore = &txStoreNew
+					}
+				}
+				if txStore != nil && len(*txStore) != 0 {
 
 					vin.PrevOut = new(btcjson.PrevOut)
 
-					txData := txStore[v.PreviousOutPoint.Hash]
+					txData := (*txStore)[v.PreviousOutPoint.Hash]
 					originTxOut := txData.Tx.MsgTx().TxOut[v.PreviousOutPoint.Index]
 					vin.PrevOut.Value = btcutil.Amount(originTxOut.Value).ToBTC()
 
@@ -776,9 +788,17 @@ func createSearchRawTransactionsResult(s *rpcServer, chainParams *chaincfg.Param
 	txHash string, blkHeader *wire.BlockHeader, blkHash string,
 	blkHeight int32, chainHeight int32, vinExtra int, filterAddrs []string) (*btcjson.SearchRawTransactionsResult, error) {
 
-	mtxHex, err := messageToHex(mtx)
-	if err != nil {
-		return nil, err
+    var mtxHex string
+	
+	// omit hex if filterAddrs are present.  When filtering, typically the
+	// goal is to reduce unnecessary bloat in the result.
+	if len(filterAddrs) == 0 {
+
+		mtxHexTmp, err := messageToHex(mtx)
+		if err != nil {
+			return nil, err
+		}
+		mtxHex = mtxHexTmp
 	}
 
 	txReply := &btcjson.SearchRawTransactionsResult{
