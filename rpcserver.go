@@ -641,6 +641,9 @@ func createVinList(mtx *wire.MsgTx) []btcjson.Vin {
 // transaction.
 func createVinListPrevOut(s *rpcServer, mtx *wire.MsgTx, chainParams *chaincfg.Params, vinExtra int) []btcjson.VinPrevOut {
 	vinList := make([]btcjson.VinPrevOut, len(mtx.TxIn))
+	
+	// we don't call fetchInputTransactions() here because it may not be
+	// necessary so we defer until it is.  ( lazy load )
 	var txStore *blockchain.TxStore
 	
 	for i, v := range mtx.TxIn {
