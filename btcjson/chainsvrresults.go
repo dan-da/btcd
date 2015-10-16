@@ -364,6 +364,7 @@ type InfoChainResult struct {
 	Difficulty      float64 `json:"difficulty"`
 	TestNet         bool    `json:"testnet"`
 	RelayFee        float64 `json:"relayfee"`
+	Errors          string  `json:"errors"`
 }
 
 // LocalAddressesResult models the localaddresses data from the getnetworkinfo
@@ -399,7 +400,7 @@ type TxRawResult struct {
 // SearchRawTransactionsResult models the data from the searchrawtransaction
 // command.
 type SearchRawTransactionsResult struct {
-	Hex           string       `json:"hex"`
+	Hex           string       `json:"hex,omitempty"`
 	Txid          string       `json:"txid"`
 	Version       int32        `json:"version"`
 	LockTime      uint32       `json:"locktime"`
