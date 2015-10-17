@@ -400,7 +400,7 @@ type TxRawResult struct {
 // SearchRawTransactionsResult models the data from the searchrawtransaction
 // command.
 type SearchRawTransactionsResult struct {
-	Hex           string       `json:"hex,omitempty"`
+	Hex           string       `json:"hex"`
 	Txid          string       `json:"txid"`
 	Version       int32        `json:"version"`
 	LockTime      uint32       `json:"locktime"`
