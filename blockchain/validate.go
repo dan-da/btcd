@@ -151,7 +151,7 @@ func IsFinalizedTransaction(tx *btcutil.Tx, blockHeight int32, blockTime time.Ti
 		return true
 	}
 
-	// At this point, the transaction's lock time hasn't occured yet, but
+	// At this point, the transaction's lock time hasn't occurred yet, but
 	// the transaction might still be finalized if the sequence number
 	// for all transaction inputs is maxed out.
 	for _, txIn := range msgTx.TxIn {
@@ -764,7 +764,7 @@ func ExtractCoinbaseHeight(coinbaseTx *btcutil.Tx) (int32, error) {
 		str := "the coinbase signature script for blocks of " +
 			"version %d or greater must start with the " +
 			"serialized block height"
-		str = fmt.Sprintf(str, serializedLen)
+		str = fmt.Sprintf(str, serializedHeightVersion)
 		return 0, ruleError(ErrMissingCoinbaseHeight, str)
 	}
 

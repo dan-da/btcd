@@ -140,6 +140,7 @@ var MainNetParams = Params{
 		{319400, newShaHashFromStr("000000000000000021c6052e9becade189495d1c539aa37c58917305fd15f13b")},
 		{343185, newShaHashFromStr("0000000000000000072b8bf361d01a6ba7d445dd024203fafc78768ed4368554")},
 		{352940, newShaHashFromStr("000000000000000010755df42dba556bb72be6a32f3ce0b6941ce4430152c9ff")},
+		{382320, newShaHashFromStr("00000000000000000a8dc6ed5b133d0eb2fd6af56203e4159789b092defd8ab2")},
 	},
 
 	// Enforce current block version once majority of the network has
@@ -225,7 +226,6 @@ var TestNet3Params = Params{
 	Net:         wire.TestNet3,
 	DefaultPort: "18333",
 	DNSSeeds: []string{
-		"testnet-seed.alexykot.me",
 		"testnet-seed.bitcoin.schildbach.de",
 		"testnet-seed.bitcoin.petertodd.org",
 		"testnet-seed.bluematt.me",
@@ -338,22 +338,22 @@ var (
 
 var (
 	registeredNets = map[wire.BitcoinNet]struct{}{
-		MainNetParams.Net:       struct{}{},
-		TestNet3Params.Net:      struct{}{},
-		RegressionNetParams.Net: struct{}{},
-		SimNetParams.Net:        struct{}{},
+		MainNetParams.Net:       {},
+		TestNet3Params.Net:      {},
+		RegressionNetParams.Net: {},
+		SimNetParams.Net:        {},
 	}
 
 	pubKeyHashAddrIDs = map[byte]struct{}{
-		MainNetParams.PubKeyHashAddrID:  struct{}{},
-		TestNet3Params.PubKeyHashAddrID: struct{}{}, // shared with regtest
-		SimNetParams.PubKeyHashAddrID:   struct{}{},
+		MainNetParams.PubKeyHashAddrID:  {},
+		TestNet3Params.PubKeyHashAddrID: {}, // shared with regtest
+		SimNetParams.PubKeyHashAddrID:   {},
 	}
 
 	scriptHashAddrIDs = map[byte]struct{}{
-		MainNetParams.ScriptHashAddrID:  struct{}{},
-		TestNet3Params.ScriptHashAddrID: struct{}{}, // shared with regtest
-		SimNetParams.ScriptHashAddrID:   struct{}{},
+		MainNetParams.ScriptHashAddrID:  {},
+		TestNet3Params.ScriptHashAddrID: {}, // shared with regtest
+		SimNetParams.ScriptHashAddrID:   {},
 	}
 
 	// Testnet is shared with regtest.
